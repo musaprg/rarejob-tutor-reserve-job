@@ -16,6 +16,8 @@ jobs:
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
         RAREJOB_EMAIL: ${{ secrets.RAREJOB_EMAIL }}
         RAREJOB_PASSWORD: ${{ secrets.RAREJOB_PASSWORD }}
+        RESERVATION_TIME: "9:30"
+        RESERVATION_MARGIN_MINUTES: "30"
     steps:
       - name: Reserve a next lesson
         env:
@@ -31,5 +33,5 @@ jobs:
             -year ${TOMORROW_YEAR} \
             -month ${TOMORROW_MONTH} \
             -day ${TOMORROW_DAY_OF_MONTH} \
-            -time "9:30" \
-            -margin 30
+            -time ${RESERVATION_TIME} \
+            -margin ${RESERVATION_MARGIN_MINUTES}
