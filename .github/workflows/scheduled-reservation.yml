@@ -1,7 +1,13 @@
 name: Reserve next daily lesson
 on:
   schedule:
-    - cron: "0 13 * * *" # execute at every 22:00 (JST)
+    - cron: "0 13 * * 0"
+    - cron: "0 13 * * 1"
+    - cron: "0 13 * * 2"
+    - cron: "0 13 * * 3"
+    - cron: "0 13 * * 4"
+    - cron: "0 13 * * 5"
+    - cron: "0 13 * * 6"
   workflow_dispatch:
 jobs:
   reserve:
@@ -17,9 +23,11 @@ jobs:
         RAREJOB_EMAIL: ${{ secrets.RAREJOB_EMAIL }}
         RAREJOB_PASSWORD: ${{ secrets.RAREJOB_PASSWORD }}
         RESERVATION_TIME: "9:30"
-        RESERVATION_MARGIN_MINUTES: "30"
+        RESERVATION_MARGIN_MINUTES: "0"
     steps:
       - name: Reserve a next lesson
+        # Skip Fri and Sat reservation i.e. I don't want to do english lesson on weekends.
+        if: github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
         env:
           TZ: "Asia/Tokyo" # Timezone is set to JST
         run: |
