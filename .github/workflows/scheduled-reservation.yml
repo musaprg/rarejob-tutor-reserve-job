@@ -32,4 +32,5 @@ jobs:
             -month ${TOMORROW_MONTH} \
             -day ${TOMORROW_DAY_OF_MONTH} \
             -time ${RESERVATION_TIME} \
-            -margin ${RESERVATION_MARGIN_MINUTES}
+            -margin ${RESERVATION_MARGIN_MINUTES} \
+            -max-retry 2
