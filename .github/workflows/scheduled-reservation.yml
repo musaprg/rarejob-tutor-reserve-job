@@ -18,11 +18,11 @@ jobs:
     container:
       image: ghcr.io/musaprg/rarejobctl:latest
       env:
-        SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
-        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
         RAREJOB_EMAIL: ${{ secrets.RAREJOB_EMAIL }}
         RAREJOB_PASSWORD: ${{ secrets.RAREJOB_PASSWORD }}
-        RESERVATION_TIME: "9:30"
+        RESERVATION_TIME_1: "9:30"
+        RESERVATION_TIME_2: "9:00"
+        RESERVATION_TIME_3: "10:00"
         RESERVATION_MARGIN_MINUTES: "0"
     steps:
       - name: Reserve a next lesson
@@ -41,5 +41,42 @@ jobs:
             -year ${TOMORROW_YEAR} \
             -month ${TOMORROW_MONTH} \
             -day ${TOMORROW_DAY_OF_MONTH} \
-            -time ${RESERVATION_TIME} \
+            -time ${RESERVATION_TIME_1} \
             -margin ${RESERVATION_MARGIN_MINUTES}
+      - name: Reserve a next lesson (secondary)
+        # Skip Fri and Sat reservation i.e. I don't want to do english lesson on weekends.
+        if: failure() && github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
+        env:
+          TZ: "Asia/Tokyo" # Timezone is set to JST
+        run: |
+          export TOMORROW_YEAR=$(date -d'+1day' +'%-Y')
+          export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
+          export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
+          rarejobctl \
+            -selenium-host selenium \
+            -selenium-port 4444 \
+            -selenium-browser-name firefox \
+            -year ${TOMORROW_YEAR} \
+            -month ${TOMORROW_MONTH} \
+            -day ${TOMORROW_DAY_OF_MONTH} \
+            -time ${RESERVATION_TIME_2} \
+            -margin ${RESERVATION_MARGIN_MINUTES}
+      - name: Reserve a next lesson (tertiary)
+        # Skip Fri and Sat reservation i.e. I don't want to do english lesson on weekends.
+        if: failure() && github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
+        env:
+          TZ: "Asia/Tokyo" # Timezone is set to JST
+        run: |
+          export TOMORROW_YEAR=$(date -d'+1day' +'%-Y')
+          export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
+          export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
+          rarejobctl \
+            -selenium-host selenium \
+            -selenium-port 4444 \
+            -selenium-browser-name firefox \
+            -year ${TOMORROW_YEAR} \
+            -month ${TOMORROW_MONTH} \
+            -day ${TOMORROW_DAY_OF_MONTH} \
+            -time ${RESERVATION_TIME_3} \
+            -margin ${RESERVATION_MARGIN_MINUTES}
+
