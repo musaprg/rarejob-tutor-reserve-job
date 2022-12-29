@@ -79,4 +79,11 @@ jobs:
             -day ${TOMORROW_DAY_OF_MONTH} \
             -time ${RESERVATION_TIME_3} \
             -margin ${RESERVATION_MARGIN_MINUTES}
+      - name: notify to discord
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'レッスン予約に失敗しました ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
 
