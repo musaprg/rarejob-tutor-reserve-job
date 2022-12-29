@@ -83,7 +83,7 @@ jobs:
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@master
+        uses: Ilshidur/action-discord@0.3.2
         with:
           args: 'レッスン予約に失敗しました ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
 
