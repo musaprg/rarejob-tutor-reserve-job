@@ -1,13 +1,7 @@
 name: Reserve next daily lesson
 on:
   schedule:
-    - cron: "0 13 * * 0"
-    - cron: "0 13 * * 1"
-    - cron: "0 13 * * 2"
-    - cron: "0 13 * * 3"
-    - cron: "0 13 * * 4"
-    - cron: "0 13 * * 5"
-    - cron: "0 13 * * 6"
+    - cron: "0 * * * *"
   workflow_dispatch:
 jobs:
   reserve:
@@ -20,15 +14,10 @@ jobs:
       env:
         RAREJOB_EMAIL: ${{ secrets.RAREJOB_EMAIL }}
         RAREJOB_PASSWORD: ${{ secrets.RAREJOB_PASSWORD }}
-        RESERVATION_TIME_1: "9:30"
-        RESERVATION_TIME_2: "9:00"
-        RESERVATION_TIME_3: "10:00"
+        RESERVATION_TIME: "9:30"
         RESERVATION_MARGIN_MINUTES: "0"
     steps:
       - name: Reserve a next lesson
-        id: reserve1
-        # Skip Fri and Sat reservation i.e. I don't want to do english lesson on weekends.
-        if: github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
         env:
           TZ: "Asia/Tokyo" # Timezone is set to JST
         run: |
@@ -42,49 +31,5 @@ jobs:
             -year ${TOMORROW_YEAR} \
             -month ${TOMORROW_MONTH} \
             -day ${TOMORROW_DAY_OF_MONTH} \
-            -time ${RESERVATION_TIME_1} \
+            -time ${RESERVATION_TIME} \
             -margin ${RESERVATION_MARGIN_MINUTES}
-      - name: Reserve a next lesson (secondary)
-        id: reserve2
-        if: failure() && github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
-        env:
-          TZ: "Asia/Tokyo" # Timezone is set to JST
-        run: |
-          export TOMORROW_YEAR=$(date -d'+1day' +'%-Y')
-          export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
-          export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
-          rarejobctl \
-            -selenium-host selenium \
-            -selenium-port 4444 \
-            -selenium-browser-name firefox \
-            -year ${TOMORROW_YEAR} \
-            -month ${TOMORROW_MONTH} \
-            -day ${TOMORROW_DAY_OF_MONTH} \
-            -time ${RESERVATION_TIME_2} \
-            -margin ${RESERVATION_MARGIN_MINUTES}
-      - name: Reserve a next lesson (tertiary)
-        id: reserve3
-        if: failure() && github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
-        env:
-          TZ: "Asia/Tokyo" # Timezone is set to JST
-        run: |
-          export TOMORROW_YEAR=$(date -d'+1day' +'%-Y')
-          export TOMORROW_MONTH=$(date -d'+1day' +'%-m')
-          export TOMORROW_DAY_OF_MONTH=$(date -d'+1day' +'%-d')
-          rarejobctl \
-            -selenium-host selenium \
-            -selenium-port 4444 \
-            -selenium-browser-name firefox \
-            -year ${TOMORROW_YEAR} \
-            -month ${TOMORROW_MONTH} \
-            -day ${TOMORROW_DAY_OF_MONTH} \
-            -time ${RESERVATION_TIME_3} \
-            -margin ${RESERVATION_MARGIN_MINUTES}
-      - name: notify failure to discord
-        if: steps.reserve1.outputs.status == 'failure' && steps.reserve2.outputs.status == 'failure' && steps.reserve3.outputs.status == 'failure'
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        uses: Ilshidur/action-discord@0.3.2
-        with:
-          args: 'レッスン予約に失敗しました ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
-
