@@ -26,6 +26,7 @@ jobs:
         RESERVATION_MARGIN_MINUTES: "0"
     steps:
       - name: Reserve a next lesson
+        id: reserve1
         # Skip Fri and Sat reservation i.e. I don't want to do english lesson on weekends.
         if: github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
         env:
@@ -44,7 +45,7 @@ jobs:
             -time ${RESERVATION_TIME_1} \
             -margin ${RESERVATION_MARGIN_MINUTES}
       - name: Reserve a next lesson (secondary)
-        # Skip Fri and Sat reservation i.e. I don't want to do english lesson on weekends.
+        id: reserve2
         if: failure() && github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
         env:
           TZ: "Asia/Tokyo" # Timezone is set to JST
@@ -62,7 +63,7 @@ jobs:
             -time ${RESERVATION_TIME_2} \
             -margin ${RESERVATION_MARGIN_MINUTES}
       - name: Reserve a next lesson (tertiary)
-        # Skip Fri and Sat reservation i.e. I don't want to do english lesson on weekends.
+        id: reserve3
         if: failure() && github.event.schedule != '0 13 * * 5' && github.event.schedule != '0 13 * * 6'
         env:
           TZ: "Asia/Tokyo" # Timezone is set to JST
@@ -79,8 +80,8 @@ jobs:
             -day ${TOMORROW_DAY_OF_MONTH} \
             -time ${RESERVATION_TIME_3} \
             -margin ${RESERVATION_MARGIN_MINUTES}
-      - name: notify to discord
-        if: failure()
+      - name: notify failure to discord
+        if: steps.reserve1.outputs.status == 'failure' && steps.reserve2.outputs.status == 'failure' && steps.reserve3.outputs.status == 'failure'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@0.3.2
