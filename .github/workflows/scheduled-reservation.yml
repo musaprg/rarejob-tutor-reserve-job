@@ -1,7 +1,9 @@
 name: Reserve next daily lesson
 on:
-  schedule:
-    - cron: "0 * * * *"
+  schedule: # Reserve lessons only on workdays
+    - cron: "0 15-23 * * 6" # 15:00 Sat UTC -> 0:00 Sun UTC+9
+    - cron: "0 * * * 0-3"   # 15:00 Sat UTC -> 0:00 Sun UTC+9
+    - cron: "0 0-14 * * 4"  # 14:00 Thu UTC -> 23:00 Thu UTC+9
   workflow_dispatch:
 jobs:
   reserve:
